@@ -31,7 +31,7 @@ const storageImg = multer.diskStorage({
 const uploadImg= multer({ storage: storageImg });
 
 router.post("/create",authenticateToken,uploadImg.array('files',5), async (req,res)=>{
-    const {first_name,last_name,email,phone,gender,dob} = JSON.parse(req.body.jsondata)
+    const {first_name,last_name,email,phone,gender,dob,country,state} = JSON.parse(req.body.jsondata)
     if (!req.files) {
         return res.status(400).json({ message: 'No file uploaded' });
       }
@@ -42,7 +42,7 @@ router.post("/create",authenticateToken,uploadImg.array('files',5), async (req,r
     });
 
     try{
-        await test_controller.createRecord(first_name,last_name,email,phone,gender,dob,JSON.stringify(filepaths))
+        await test_controller.createRecord(first_name,last_name,email,phone,gender,dob,JSON.stringify(filepaths),country,state)
         res.status(201).json({result:true,message:"Profile Registered Successfully"})
     }catch(error){
         res.status(error.status||500).json({error: error.message})
@@ -117,6 +117,23 @@ router.post('/upload',authenticateToken,uploadCSV.single('file'),async (req,res)
     }
 })
 
+router.get('/countries',authenticateToken,async (req,res)=>{
+    try{
+        const response = await test_controller.getCountries();
+        return res.json(response);
+    }catch(error){
+        res.status(error.status||500).json({error:error.message})
+    }
+})
 
+router.get('/states/:cid',authenticateToken,async (req,res)=>{
+    const country_code = req.params.cid;
+    try{
+        const response = await test_controller.getStatesByCountry(country_code);
+        return res.json(response);
+    }catch(error){
+        res.status(error.status||500).json({error:error.message})
+    }
+})
 
 module.exports = router

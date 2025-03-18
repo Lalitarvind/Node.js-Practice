@@ -54,6 +54,26 @@ async function getProfileByID(id) {
     }
 }
 
+async function getCountries() {
+    try{
+        const [resp] = await pool.query(queries.getCountries);
+        return resp
+    }catch(error){
+        console.error("Database Error:", error.message);
+        throw ({ status:500 , message:"Database operation failed"});
+    }
+}
+
+async function getStatesByCountry(country_code) {
+    try{
+        const [resp] = await pool.query(queries.getStatesByCountry,[country_code]);
+        return resp
+    }catch(error){
+        console.error("Database Error:", error.message);
+        throw ({ status:500 , message:"Database operation failed"});
+    }
+}
+
 async function updateVisibility(rids){
     try{
         const rid_str = rids.join(',')
@@ -64,9 +84,9 @@ async function updateVisibility(rids){
     }
 }
 
-async function createRecord(fname,lname,email,phone,gender,dob,filepath){
+async function createRecord(fname,lname,email,phone,gender,dob,filepath,country,state){
     try{
-        await pool.query(queries.createProfile,[fname,lname,email,phone,gender,dob,filepath])
+        await pool.query(queries.createProfile,[fname,lname,email,phone,gender,dob,filepath,country,state])
     }catch(error){
         console.error("Database Error:", error.message);
         throw ({ status:500 , message:"Database operation failed"});
@@ -86,7 +106,7 @@ async function updateRecord(rid, updates){
 
 async function importRecordsFromFile(filePath){
     const results = [];
-    const EXPECTED_HEADERS = ['first_name','last_name','email','phone','dob','gender']
+    const EXPECTED_HEADERS = ['first_name','last_name','email','phone','dob','gender','country','state']
     const stream = fs.createReadStream(filePath).pipe(removeBOM('utf-8')).pipe(csvParser());
     // Read and Process CSV
     stream.on('headers', (headers) => {     
@@ -116,4 +136,4 @@ async function importRecordsFromFile(filePath){
     });
 }
 
-module.exports = {getVisibleRecords, updateVisibility,createRecord, updateRecord, getProfileByID,importRecordsFromFile}
+module.exports = {getVisibleRecords, updateVisibility,createRecord, updateRecord, getProfileByID,importRecordsFromFile,getCountries,getStatesByCountry}

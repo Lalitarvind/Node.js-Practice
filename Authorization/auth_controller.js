@@ -44,7 +44,7 @@ async function loginUser(emailID,password) {
         if (!isMatch){
             throw({status:401, message:"Incorrect Password!"})
         }
-        const accessToken = jwt.sign({ userId: user.id, emailId: emailID }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "15m" });
+        const accessToken = jwt.sign({ userId: user.id, emailId: emailID }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "1d" });
         const refreshToken = jwt.sign({ userId: user.id, emailId: emailID }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: "7d" });
         
         await pool.execute(queries.updateRefreshToken, [user.id, refreshToken]);
